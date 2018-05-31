@@ -40,14 +40,20 @@ settings = DataLoader()
 
 class LaughFilter(BaseFilter):
     def filter(self, message):
-        lower_message = message.text.lower()
-        return ('hahaha' in lower_message) or ('jajaja' in lower_message) or ('me descojono' in lower_message)
+        lower_message = str(message.text).lower()
+        if ('hahaha' in lower_message) or ('jajaja' in lower_message):
+            return True
+        else:
+            return False
 
 
 class PlayaFilter(BaseFilter):
     def filter(self, message):
-        lower_message = message.text.lower()
-        return ('primera linea de playa' in lower_message) or ('primera línea de playa' in lower_message)
+        lower_message = str(message.text).lower()
+        if ('primera linea de playa' in lower_message) or ('primera línea de playa' in lower_message):
+            return True
+        else:
+            return False
 
 
 def load_settings():
@@ -133,23 +139,20 @@ def alguien(bot, update):
 
 def jokes(bot, update):
     global last_joke
-    log_message("JOKES " + update)
-    if datetime.datetime.now() - last_joke > datetime.timedelta(minutes=60):
-        bot.sendMessage(update.message.chat_id, jokes[random.randint(0, int(len(jokes) - 1))])
+    # log_message("JOKES " + update)
+    if datetime.datetime.now() - last_joke > datetime.timedelta(minutes=15):
+        bot.sendMessage(update.message.chat_id, settings.jokes[random.randint(0, int(len(settings.jokes) - 1))])
         last_joke = datetime.datetime.now()
 
 
 def reload(bot, update):
-    log_message("RELOAD " + update)
+    # log_message("RELOAD " + update)
     if update.message.chat_id == settings.president_chatid:
         load_settings()
         bot.send_message(chat_id=update.message.chat_id, text="Datos cargados")
 
-    # loop del bot
-
 
 def playa(bot, update):
-    log_message("PLAYA " + update)
     bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
 
 
@@ -173,7 +176,7 @@ if __name__ == "__main__":
     load_settings()
 
     last_room_call = datetime.datetime.now() - datetime.timedelta(minutes=10);
-    last_joke = datetime.datetime.now() - datetime.timedelta(minutes=60);
+    last_joke = datetime.datetime.now() - datetime.timedelta(minutes=15);
 
     try:
         logger.info("Conectando con la API de Telegram.")
@@ -186,11 +189,13 @@ if __name__ == "__main__":
         dispatcher.add_handler(CommandHandler('fotorack', fotorack))
         dispatcher.add_handler(CommandHandler('alguien', alguien))
         dispatcher.add_handler(CommandHandler('reload', reload))
-        dispatcher.add_handler(MessageHandler(LaughFilter(), jokes))
-        dispatcher.add_handler(MessageHandler(PlayaFilter(), playa))
-        dispatcher.add_handler(RegexHandler("(ja)+", jokes))
-        dispatcher.add_handler(MessageHandler(Filters.text, playa))
+        joke_filter = LaughFilter()
+        dispatcher.add_handler(MessageHandler(joke_filter, jokes))
+        # Inside joke
+        playa_filter = PlayaFilter()
+        dispatcher.add_handler(MessageHandler(playa_filter, playa))
         dispatcher.add_error_handler(error_callback)
+
     except Exception as ex:
         logger.exception("Error al conectar con la API de Telegram.")
         quit()
