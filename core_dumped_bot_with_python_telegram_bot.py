@@ -50,10 +50,11 @@ class LaughFilter(BaseFilter):
 
 class PlayaFilter(BaseFilter):
     def filter(self, message):
-        result = False
-        result = result or 'primera linea de playa' in message.text.lower()
-        result = result or u'primera línea de playa' in message.text.lower()
-        return result
+        lower_message = message.lower()
+        if ("primera linea de playa" in lower_message) or ("primera línea de playa" in lower_message):
+            return True
+        else:
+            return False
 
 
 def load_settings():
