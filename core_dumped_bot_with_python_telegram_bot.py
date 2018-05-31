@@ -40,17 +40,17 @@ settings = DataLoader()
 
 class LaughFilter(BaseFilter):
     def filter(self, message):
-        result = False
-        result = result or 'hahaha' in message.text.lower()
-        result = result or 'jajaja' in message.text.lower()
-        result = result or 'me despollo' in message.text.lower()
-        result = result or 'me descojono' in message.text.lower()
-        return result
+        lower_message = str(message).lower()
+        if ("hahaha" in lower_message) or ("jajaja" in lower_message) or ("me despollo" in lower_message) or \
+                ("me descojono" in lower_message):
+            return True
+        else:
+            return False
 
 
 class PlayaFilter(BaseFilter):
     def filter(self, message):
-        lower_message = message.lower()
+        lower_message = str(message).lower()
         if ("primera linea de playa" in lower_message) or ("primera línea de playa" in lower_message):
             return True
         else:
@@ -94,13 +94,13 @@ def foto(bot, update):
     bot.send_message(chat_id=update.message.chat_id,
                      text="¿Qué foto quieres?",
                      reply_markup=reply_markup,
-					 reply_to_message_id = update.message.message_id)
+                     reply_to_message_id=update.message.message_id)
     reply_markup = telegram.ReplyKeyboardRemove()
 
 
 def log_message(update):
     logger.info("He recibido: \"" + update.message.text + "\" de " + update.message.from_user.username + " [ID: " + str(
-            update.message.chat_id) + "]")
+        update.message.chat_id) + "]")
 
 
 def fotonevera(bot, update):
@@ -126,7 +126,7 @@ def fotorack(bot, update):
 
 def alguien(bot, update):
     global last_room_call
-    log_message("NET SCAN " +update)
+    log_message("NET SCAN " + update)
     msg_id = update.message.message_id
     if datetime.datetime.now() - last_room_call > datetime.timedelta(minutes=10):
         bot.sendMessage(update.message.chat_id,
@@ -147,7 +147,7 @@ def jokes(bot, update):
 
 
 def reload(bot, update):
-    log_message("RELOAD " +update)
+    log_message("RELOAD " + update)
     if update.message.chat_id == settings.president_chatid:
         load_settings()
         bot.send_message(chat_id=update.message.chat_id, text="Datos cargados")
@@ -156,7 +156,7 @@ def reload(bot, update):
 
 
 def playa(bot, update):
-    log_message("PLAYA " +update)
+    log_message("PLAYA " + update)
     bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
 
 
@@ -181,6 +181,8 @@ if __name__ == "__main__":
 
     last_room_call = datetime.datetime.now() - datetime.timedelta(minutes=10);
     last_joke = datetime.datetime.now() - datetime.timedelta(minutes=60);
+    laugh_filter = LaughFilter()
+    playa_filter = PlayaFilter()
 
     try:
         logger.info("Conectando con la API de Telegram.")
@@ -193,10 +195,10 @@ if __name__ == "__main__":
         dispatcher.add_handler(CommandHandler('fotorack', fotorack))
         dispatcher.add_handler(CommandHandler('alguien', alguien))
         dispatcher.add_handler(CommandHandler('reload', reload))
-        dispatcher.add_handler(MessageHandler(LaughFilter(), jokes))
-        dispatcher.add_handler(MessageHandler(PlayaFilter(), playa))
-        dispatcher.add_handler(RegexHandler("(ja)+", jokes))
-        dispatcher.add_handler(MessageHandler(Filters.text, playa))
+        dispatcher.add_handler(MessageHandler(laugh_filter, jokes))
+        dispatcher.add_handler(MessageHandler(playa_filter, playa))
+        # dispatcher.add_handler(RegexHandler("(ja)+", jokes))
+        # dispatcher.add_handler(MessageHandler(Filters.text, playa))
         dispatcher.add_error_handler(error_callback)
     except Exception as ex:
         logger.exception("Error al conectar con la API de Telegram.")
