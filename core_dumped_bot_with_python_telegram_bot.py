@@ -40,7 +40,7 @@ settings = DataLoader()
 
 class LaughFilter(BaseFilter):
     def filter(self, message):
-        lower_message = str(message).lower()
+        lower_message = str(message.text).lower()
         if ("hahaha" in lower_message) or ("jajaja" in lower_message) or ("me despollo" in lower_message) or \
                 ("me descojono" in lower_message):
             return True
@@ -50,7 +50,7 @@ class LaughFilter(BaseFilter):
 
 class PlayaFilter(BaseFilter):
     def filter(self, message):
-        lower_message = str(message).lower()
+        lower_message = str(message.text).lower()
         if ("primera linea de playa" in lower_message) or ("primera línea de playa" in lower_message):
             return True
         else:
