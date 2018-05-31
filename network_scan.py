@@ -7,12 +7,10 @@ from logger import get_logger
 
 settings = DataLoader()
 logger = get_logger("network_scan")
-network = settings.network
-admin_password = settings.admin_password
 
 
 def scan_for_devices():
-    scan = subprocess.check_output("echo "+admin_password+" | nmap -sP " + network, shell=True)
+    scan = subprocess.check_output("echo " + settings.admin_password + " | sudo nmap -sP " + settings.network, shell=True)
     p = re.compile(ur'(?:[0-9a-fA-F]:?){12}')
     return re.findall(p, scan)
 

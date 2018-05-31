@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import random
-
 import telegram
 import network_scan as scan
 import datetime
@@ -35,7 +34,6 @@ def error_callback(bot, update, error):
 
 reload(sys)
 sys.setdefaultencoding('utf8')
-settings = DataLoader()
 
 
 class LaughFilter(BaseFilter):
@@ -58,7 +56,11 @@ class PlayaFilter(BaseFilter):
 
 def load_settings():
     global settings
+    global last_joke
+    global last_room_call
     settings = DataLoader()
+    last_room_call = datetime.datetime.now() - datetime.timedelta(minutes=10);
+    last_joke = datetime.datetime.now() - datetime.timedelta(minutes=15);
 
 
 def is_member(username):
@@ -174,10 +176,6 @@ if __name__ == "__main__":
 
     logger = get_logger("bot_starter", True)
     load_settings()
-
-    last_room_call = datetime.datetime.now() - datetime.timedelta(minutes=10);
-    last_joke = datetime.datetime.now() - datetime.timedelta(minutes=15);
-
     try:
         logger.info("Conectando con la API de Telegram.")
         updater = Updater(settings.telegram_token)
