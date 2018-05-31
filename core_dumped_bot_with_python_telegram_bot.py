@@ -141,8 +141,9 @@ def alguien(bot, update):
 def jokes(bot, update):
     global last_joke
     log_message("JOKES " + update)
+    jokes_list = settings.jokes
     if datetime.datetime.now() - last_joke > datetime.timedelta(minutes=60):
-        bot.sendMessage(update.message.chat_id, jokes[random.randint(0, int(len(jokes) - 1))])
+        bot.sendMessage(update.message.chat_id, jokes_list[random.randint(0, int(len(jokes_list) - 1))])
         last_joke = datetime.datetime.now()
 
 
