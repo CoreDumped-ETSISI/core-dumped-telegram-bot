@@ -1,0 +1,31 @@
+{
+  "telegram token": "INSERT TOKEN HERE",
+  "answers": [
+    "YES",
+    "NO"
+  ],
+  "help": "HELP STRING",
+  "jokes": [
+    "I don't get it.",
+    "Hahahahahaha *pretending*"
+  ],
+  "devices": {
+    "00:00:00:00:00:00": "Example User",
+    "00:00:00:00:00:02": "Example User 2"
+  },
+  "members": [
+    "@username1",
+    "@username2"
+  ],
+  "working directory": "/home/user/project_root",
+  "pictures directory": "/home/user/pictures",
+  "cams urls": [
+    "rtsp://user:pass@192.168.0.2:554",
+    "rtsp://user:pass@192.168.0.3:554"
+  ],
+  "network": "192.168.0.0/24",
+  "admin password": "Pas5w0rD",
+  "public group chat id": -1111111111111,
+  "admin group chat id": -1111111111112,
+  "president chat id": 111111111
+}
