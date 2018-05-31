@@ -40,21 +40,14 @@ settings = DataLoader()
 
 class LaughFilter(BaseFilter):
     def filter(self, message):
-        result = False
-        result = result or 'hahaha' in message.text.lower()
-        result = result or 'jajaja' in message.text.lower()
-        result = result or 'me despollo' in message.text.lower()
-        result = result or 'me descojono' in message.text.lower()
-        return result
+        lower_message = message.text.lower()
+        return ('hahaha' in lower_message) or ('jajaja' in lower_message) or ('me descojono' in lower_message)
 
 
 class PlayaFilter(BaseFilter):
     def filter(self, message):
-        lower_message = message.lower()
-        if ("primera linea de playa" in lower_message) or ("primera línea de playa" in lower_message):
-            return True
-        else:
-            return False
+        lower_message = message.text.lower()
+        return ('primera linea de playa' in lower_message) or ('primera línea de playa' in lower_message)
 
 
 def load_settings():
@@ -94,13 +87,13 @@ def foto(bot, update):
     bot.send_message(chat_id=update.message.chat_id,
                      text="¿Qué foto quieres?",
                      reply_markup=reply_markup,
-					 reply_to_message_id = update.message.message_id)
+                     reply_to_message_id=update.message.message_id)
     reply_markup = telegram.ReplyKeyboardRemove()
 
 
 def log_message(update):
     logger.info("He recibido: \"" + update.message.text + "\" de " + update.message.from_user.username + " [ID: " + str(
-            update.message.chat_id) + "]")
+        update.message.chat_id) + "]")
 
 
 def fotonevera(bot, update):
@@ -126,7 +119,7 @@ def fotorack(bot, update):
 
 def alguien(bot, update):
     global last_room_call
-    log_message("NET SCAN " +update)
+    log_message("NET SCAN " + update)
     msg_id = update.message.message_id
     if datetime.datetime.now() - last_room_call > datetime.timedelta(minutes=10):
         bot.sendMessage(update.message.chat_id,
@@ -147,7 +140,7 @@ def jokes(bot, update):
 
 
 def reload(bot, update):
-    log_message("RELOAD " +update)
+    log_message("RELOAD " + update)
     if update.message.chat_id == settings.president_chatid:
         load_settings()
         bot.send_message(chat_id=update.message.chat_id, text="Datos cargados")
@@ -156,7 +149,7 @@ def reload(bot, update):
 
 
 def playa(bot, update):
-    log_message("PLAYA " +update)
+    log_message("PLAYA " + update)
     bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
 
 
