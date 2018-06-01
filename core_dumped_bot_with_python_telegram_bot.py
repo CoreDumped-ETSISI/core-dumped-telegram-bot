@@ -63,11 +63,9 @@ def load_settings():
     last_joke = datetime.datetime.now() - datetime.timedelta(minutes=15);
 
 
-def is_member(username):
-    answer = False
-    for member in settings.members:
-        answer = answer or username == member
-    return answer
+def is_member(bot, user_id):
+    return bot.get_chat_member(chat_id=settings.admin_chatid, user_id=user_id).status in ['creator', 'administrator', 'member']
+
 
 
 def help(bot, update):
