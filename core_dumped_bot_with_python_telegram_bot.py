@@ -77,6 +77,8 @@ def help(bot, update):
 
 def ask(bot, update):
     log_message(update)
+	bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
+	time.sleep(2)
     bot.sendMessage(update.message.chat_id, settings.answers[random.randint(0, int(len(settings.answers) - 1))],
                     parse_mode=telegram.ParseMode.MARKDOWN)
 
@@ -108,7 +110,8 @@ def fotonevera(bot, update):
     log_message(update)
 
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
-        take_rtsp_screenshot(0)
+		bot.send_chat_action(chat_id=update.message.chat_id, action='upload_photo')
+		take_rtsp_screenshot(0)
         reply_markup = telegram.ReplyKeyboardRemove()
         bot.sendPhoto(chat_id=update.message.chat_id,
                       photo=open(settings.pictures_directory + '/snapshot.jpg', 'rb'), reply_markup=reply_markup)
@@ -118,7 +121,8 @@ def fotonevera(bot, update):
 def fotorack(bot, update):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
-        take_rtsp_screenshot(1)
+        bot.send_chat_action(chat_id=update.message.chat_id, action='upload_photo')
+		take_rtsp_screenshot(1)
         reply_markup = telegram.ReplyKeyboardRemove()
         bot.sendPhoto(chat_id=update.message.chat_id,
                       photo=open(settings.pictures_directory + '/snapshot.jpg', 'rb'), reply_markup=reply_markup)
@@ -143,6 +147,8 @@ def jokes(bot, update):
     global last_joke
     # log_message("JOKES " + update)
     if datetime.datetime.now() - last_joke > datetime.timedelta(minutes=15):
+		bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
+		time.sleep(2)
         bot.sendMessage(update.message.chat_id, settings.jokes[random.randint(0, int(len(settings.jokes) - 1))])
         last_joke = datetime.datetime.now()
 
