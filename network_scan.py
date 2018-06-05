@@ -10,7 +10,7 @@ logger = get_logger("network_scan")
 
 
 def scan_for_devices():
-    scan = subprocess.check_output("echo " + settings.admin_password + " | sudo nmap -sP " + settings.network, shell=True)
+    scan = subprocess.check_output("echo \"" + settings.admin_password + "\"\n | sudo nmap -sP " + settings.network, shell=True)
     p = re.compile(ur'(?:[0-9a-fA-F]:?){12}')
     return re.findall(p, scan)
 
