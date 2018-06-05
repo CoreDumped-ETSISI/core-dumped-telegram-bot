@@ -9,10 +9,13 @@ import os
 from logger import get_logger
 from data_loader import DataLoader
 import sys
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseFilter, RegexHandler
-
+from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter
+from random import normalvariate
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 
 def error_callback(bot, update, error):
@@ -27,13 +30,9 @@ def error_callback(bot, update, error):
     except NetworkError:
         logger.exception("handle other connection problems")
     except ChatMigrated as e:
-        logger.exception("the chat_id of a group has changed, use e.new_chat_id instead")
+        logger.exception("the chat_id of a group has changed, use " + e.new_chat_id + " instead")
     except TelegramError:
         logger.exception("There is some error with Telegram")
-
-
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 
 class LaughFilter(BaseFilter):
@@ -56,8 +55,6 @@ class PlayaFilter(BaseFilter):
 
 def load_settings():
     global settings
-    global last_joke
-    global last_room_call
     global last_function_calls
     settings = DataLoader()
     last_function_calls = {}
@@ -65,28 +62,29 @@ def load_settings():
 
 def is_member(bot, user_id):
     try:
-        return bot.get_chat_member(chat_id=settings.admin_chatid, user_id=user_id).status in ['creator', 'administrator', 'member']
+        return bot.get_chat_member(chat_id=settings.admin_chatid,
+                                   user_id=user_id).status in ['creator', 'administrator', 'member']
     except BadRequest:
-        return false
-
+        return False
 
 
 def is_call_available(name, chat_id, cooldown):
     global last_function_calls
+    now = datetime.datetime.now()
     cooldown_time = datetime.datetime.now() - datetime.timedelta(minutes=cooldown)
     if name in last_function_calls.keys():
         if chat_id in last_function_calls[name].keys():
-            if last_function_calls[name][chat_id] < cooldown_time:
-                last_function_calls[name][chat_id] = datetime.now()
+            if last_function_calls[name][chat_id] > cooldown_time:
+                last_function_calls[name][chat_id] = now
                 return False
             else:
-                last_function_calls[name][chat_id] = datetime.now()
+                last_function_calls[name][chat_id] = now
                 return True
         else:
-            last_function_calls[name] = {chat_id: datetime.now()}
+            last_function_calls[name] = {chat_id: now}
             return True
     else:
-        last_function_calls[name] = {chat_id: datetime.now()}
+        last_function_calls[name] = {chat_id: now}
         return True
 
 
@@ -98,9 +96,10 @@ def help(bot, update):
 def ask(bot, update):
     log_message(update)
     bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
-    time.sleep(2)
-    bot.sendMessage(update.message.chat_id, settings.answers[random.randint(0, int(len(settings.answers) - 1))],
-                    parse_mode=telegram.ParseMode.MARKDOWN)
+    selected_string = settings.answers[random.randint(0, int(len(settings.answers) - 1))]
+    human_texting(selected_string)
+    bot.sendMessage(update.message.chat_id, selected_string, parse_mode=telegram.ParseMode.MARKDOWN,
+                    reply_to_message_id=update.message.message_id)
 
 
 def take_rtsp_screenshot(cam_id):
@@ -150,6 +149,7 @@ def fotorack(bot, update):
 
 def alguien(bot, update):
     if is_call_available("alguien", update.message.chat_id, 15):
+        bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
         bot.sendMessage(update.message.chat_id,
                         scan.who_is_there()[
                             0] + "\n`No podrás hacer otro /alguien hasta dentro de 15 minutos`.",
@@ -158,23 +158,31 @@ def alguien(bot, update):
         bot.deleteMessage(update.message.message_id)
 
 
+def human_texting(string):
+    wait_time = len(string) * normalvariate(0.1, 0.05)
+    if wait_time > 8:
+        wait_time = 8
+    time.sleep(wait_time)
+
+
 def jokes(bot, update):
     chat_id = update.message.chat.id
-    if is_call_available("joke",chat_id,30):
+    if is_call_available("joke", chat_id, 30):
         bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
-        time.sleep(2)
-        bot.sendMessage(update.message.chat_id, settings.jokes[random.randint(0, int(len(settings.jokes) - 1))])
+        selected_joke = settings.jokes[random.randint(0, int(len(settings.jokes) - 1))]
+        human_texting(selected_joke)
+        bot.sendMessage(update.message.chat_id, selected_joke,
+                        reply_to_message_id=update.message.message_id)
 
 
-
-def reload(bot, update):
+def reload_data(bot, update):
     if update.message.from_user.id == settings.president_chatid:
         load_settings()
         bot.send_message(chat_id=update.message.chat_id, text="Datos cargados")
 
 
 def playa(bot, update):
-    if is_call_available("playa",update.message.chat.id, 10):
+    if is_call_available("playa", update.message.chat.id, 10):
         bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
 
 
@@ -187,7 +195,7 @@ def name_changer(bot, job):
         else:
             bot.setChatTitle(settings.public_chatid, u">CORE DUMPED_: \U0000274C Cerrado")
             logger.info("No hay nadie.")
-    except Exception as ex:
+    except:
         logger.exception("Error al actualizar el nombre del grupo Core Dumped.")
 
 
@@ -207,7 +215,7 @@ if __name__ == "__main__":
         dispatcher.add_handler(CommandHandler('fotonevera', fotonevera))
         dispatcher.add_handler(CommandHandler('fotorack', fotorack))
         dispatcher.add_handler(CommandHandler('alguien', alguien))
-        dispatcher.add_handler(CommandHandler('reload', reload))
+        dispatcher.add_handler(CommandHandler('reload', reload_data))
         joke_filter = LaughFilter()
         dispatcher.add_handler(MessageHandler(joke_filter, jokes))
         # Inside joke
@@ -223,7 +231,7 @@ if __name__ == "__main__":
         job_name_changer = jobs.run_repeating(name_changer, 15 * 60, 300)
         logger.info("Iniciando jobs")
     except Exception as ex:
-        logger.exception("Error al cargar la job list")
+        logger.exception("Error al cargar la job list. Ignorando jobs...")
 
     updater.start_polling()
     logger.info("Core Dumped Bot: Estoy escuchando.")
