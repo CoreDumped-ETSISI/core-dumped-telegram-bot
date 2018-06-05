@@ -58,9 +58,9 @@ def load_settings():
     global settings
     global last_joke
     global last_room_call
+    global last_function_calls
     settings = DataLoader()
-    last_room_call = datetime.datetime.now() - datetime.timedelta(minutes=10);
-    last_joke = datetime.datetime.now() - datetime.timedelta(minutes=15);
+    last_function_calls = {}
 
 
 def is_member(username):
@@ -68,6 +68,25 @@ def is_member(username):
     for member in settings.members:
         answer = answer or username == member
     return answer
+
+
+def is_call_available(name, chat_id, cooldown):
+    global last_function_calls
+    cooldown_time = datetime.datetime.now() - datetime.timedelta(minutes=cooldown)
+    if name in last_function_calls.keys():
+        if chat_id in last_function_calls[name].keys():
+            if last_function_calls[name][chat_id] < cooldown_time:
+                last_function_calls[name][chat_id] = datetime.now()
+                return False
+            else:
+                last_function_calls[name][chat_id] = datetime.now()
+                return True
+        else:
+            last_function_calls[name] = {chat_id: datetime.now()}
+            return True
+    else:
+        last_function_calls[name] = {chat_id: datetime.now()}
+        return True
 
 
 def help(bot, update):
@@ -96,7 +115,6 @@ def foto(bot, update):
                      text="¿Qué foto quieres?",
                      reply_markup=reply_markup,
                      reply_to_message_id=update.message.message_id)
-    reply_markup = telegram.ReplyKeyboardRemove()
 
 
 def log_message(update):
@@ -126,36 +144,31 @@ def fotorack(bot, update):
 
 
 def alguien(bot, update):
-    global last_room_call
-    log_message("NET SCAN " + update)
-    msg_id = update.message.message_id
-    if datetime.datetime.now() - last_room_call > datetime.timedelta(minutes=10):
+    if is_call_available("alguien", update.message.chat_id, 15):
         bot.sendMessage(update.message.chat_id,
                         scan.who_is_there()[
-                            0] + "\n`No podrás hacer otro /alguien hasta dentro de 10 minutos`.",
-                        parse_mode=telegram.ParseMode.MARKDOWN)
-        last_room_call = datetime.datetime.now()
+                            0] + "\n`No podrás hacer otro /alguien hasta dentro de 15 minutos`.",
+                        parse_mode="Markdown")
     else:
-        bot.deleteMessage(msg_id)
+        bot.deleteMessage(update.message.message_id)
 
 
 def jokes(bot, update):
-    global last_joke
-    # log_message("JOKES " + update)
-    if datetime.datetime.now() - last_joke > datetime.timedelta(minutes=15):
+    chat_id = update.message.chat.id
+    if is_call_available("joke",chat_id,30):
         bot.sendMessage(update.message.chat_id, settings.jokes[random.randint(0, int(len(settings.jokes) - 1))])
-        last_joke = datetime.datetime.now()
+
 
 
 def reload(bot, update):
-    # log_message("RELOAD " + update)
-    if update.message.chat_id == settings.president_chatid:
+    if update.message.from_user.id == settings.president_chatid:
         load_settings()
         bot.send_message(chat_id=update.message.chat_id, text="Datos cargados")
 
 
 def playa(bot, update):
-    bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
+    if is_call_available("playa",update.message.chat.id, 10):
+        bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
 
 
 def name_changer(bot, job):
@@ -176,6 +189,7 @@ if __name__ == "__main__":
 
     logger = get_logger("bot_starter", True)
     load_settings()
+
     try:
         logger.info("Conectando con la API de Telegram.")
         updater = Updater(settings.telegram_token)
@@ -193,20 +207,17 @@ if __name__ == "__main__":
         playa_filter = PlayaFilter()
         dispatcher.add_handler(MessageHandler(playa_filter, playa))
         dispatcher.add_error_handler(error_callback)
-
     except Exception as ex:
         logger.exception("Error al conectar con la API de Telegram.")
         quit()
 
     try:
         jobs = updater.job_queue
-        job_name_changer = jobs.run_repeating(name_changer, 15 * 60, 30)
+        job_name_changer = jobs.run_repeating(name_changer, 15 * 60, 300)
         logger.info("Iniciando jobs")
     except Exception as ex:
         logger.exception("Error al cargar la job list")
 
     updater.start_polling()
     logger.info("Core Dumped Bot: Estoy escuchando.")
-
-    while 1:
-        time.sleep(5)
+    updater.idle()
