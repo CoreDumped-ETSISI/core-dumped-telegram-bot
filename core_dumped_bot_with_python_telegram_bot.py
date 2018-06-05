@@ -189,6 +189,7 @@ def playa(bot, update):
 
 
 def the_game(bot, update):
+    log_message(update)
     if is_call_available("the_game", update.message.chat.id, 1800):
         bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
         selected_game = settings.the_game[random.randint(0, int(len(settings.the_game) - 1))]
@@ -220,8 +221,8 @@ if __name__ == "__main__":
         logger.info("Conectando con la API de Telegram.")
         updater = Updater(settings.telegram_token)
         dispatcher = updater.dispatcher
-        the_game_regex = re.compile(r'\b(perdido)|(game)\b', re.I)
-        dispatcher.add_handler(RegexHandler(the_game_regex, the_game))
+        the_game_regex = re.compile( r".*(\b(perdido|game)\b)" , re.I | re.U | re.M)
+        dispatcher.add_handler(RegexHandler(the_game_regex, the_game, pass_groups=True, pass_chat_data=True))
         dispatcher.add_handler(CommandHandler('help', help))
         dispatcher.add_handler(CommandHandler('ask', ask))
         dispatcher.add_handler(CommandHandler('foto', foto))
