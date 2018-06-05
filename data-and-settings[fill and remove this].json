@@ -9,6 +9,10 @@
     "I don't get it.",
     "Hahahahahaha *pretending*"
   ],
+  "the-game": [
+    "I've lost the game",
+    "The game"
+  ],
   "devices": {
     "00:00:00:00:00:00": "Example User",
     "00:00:00:00:00:02": "Example User 2"

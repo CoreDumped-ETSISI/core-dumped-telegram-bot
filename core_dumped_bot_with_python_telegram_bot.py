@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import random
+import re
+
 import telegram
 import network_scan as scan
 import datetime
@@ -9,7 +11,7 @@ import os
 from logger import get_logger
 from data_loader import DataLoader
 import sys
-from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter
+from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, RegexHandler, StringRegexHandler
 from random import normalvariate
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
@@ -186,6 +188,15 @@ def playa(bot, update):
         bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
 
 
+def the_game(bot, update):
+    if is_call_available("the_game", update.message.chat.id, 1800):
+        bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
+        selected_game = settings.the_game[random.randint(0, int(len(settings.the_game) - 1))]
+        human_texting(selected_game)
+        bot.sendMessage(update.message.chat_id, selected_game,
+                        reply_to_message_id=update.message.message_id)
+
+
 def name_changer(bot, job):
     logger.info("Starting scheduled network scan.")
     try:
@@ -209,6 +220,8 @@ if __name__ == "__main__":
         logger.info("Conectando con la API de Telegram.")
         updater = Updater(settings.telegram_token)
         dispatcher = updater.dispatcher
+        the_game_regex = re.compile(r'\b(perdido)|(game)\b', re.I)
+        dispatcher.add_handler(RegexHandler(the_game_regex, the_game))
         dispatcher.add_handler(CommandHandler('help', help))
         dispatcher.add_handler(CommandHandler('ask', ask))
         dispatcher.add_handler(CommandHandler('foto', foto))
