@@ -63,11 +63,12 @@ def load_settings():
     last_function_calls = {}
 
 
-def is_member(username):
-    answer = False
-    for member in settings.members:
-        answer = answer or username == member
-    return answer
+def is_member(bot, user_id):
+    try:
+        return bot.get_chat_member(chat_id=settings.admin_chatid, user_id=user_id).status in ['creator', 'administrator', 'member']
+    except BadRequest:
+        return false
+
 
 
 def is_call_available(name, chat_id, cooldown):

@@ -13,10 +13,6 @@
     "00:00:00:00:00:00": "Example User",
     "00:00:00:00:00:02": "Example User 2"
   },
-  "members": [
-    "@username1",
-    "@username2"
-  ],
   "working directory": "/home/user/project_root",
   "pictures directory": "/home/user/pictures",
   "cams urls": [

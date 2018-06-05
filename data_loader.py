@@ -22,7 +22,6 @@ class DataLoader:
             self.help_string = data_and_settings["help"]
             self.jokes = data_and_settings["jokes"]
             self.devices = data_and_settings["devices"]
-            self.members = data_and_settings["members"]
             self.working_directory = data_and_settings["working directory"]
             self.pictures_directory = data_and_settings["pictures directory"]
             self.cam_urls = data_and_settings["cams urls"]
@@ -55,10 +54,6 @@ class DataLoader:
     @property
     def devices(self):
         return self.devices
-
-    @property
-    def members(self):
-        return self.members
 
     @property
     def working_directory(self):
