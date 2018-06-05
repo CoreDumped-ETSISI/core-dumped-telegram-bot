@@ -64,7 +64,10 @@ def load_settings():
 
 
 def is_member(bot, user_id):
-    return bot.get_chat_member(chat_id=settings.admin_chatid, user_id=user_id).status in ['creator', 'administrator', 'member']
+    try:
+        return bot.get_chat_member(chat_id=settings.admin_chatid, user_id=user_id).status in ['creator', 'administrator', 'member']
+    except BadRequest:
+        return false
 
 
 
