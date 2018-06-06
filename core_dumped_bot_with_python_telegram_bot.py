@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import re
+import string
 import random
 import telegram
 import network_scan as scan
@@ -38,19 +40,16 @@ def error_callback(bot, update, error):
 class LaughFilter(BaseFilter):
     def filter(self, message):
         lower_message = str(message.text).lower()
-        if ('hahaha' in lower_message) or ('jajaja' in lower_message):
-            return True
-        else:
-            return False
+        regex = r"\b([aeiou]*(?:[hj]+[aeiou]+){2,}[hj]?(\W|$))|((?:l+o+)+l+)\b"
+
+        return re.match(re.compile(regex), lower_message) != None
 
 
 class PlayaFilter(BaseFilter):
     def filter(self, message):
         lower_message = str(message.text).lower()
-        if ('primera linea de playa' in lower_message) or ('primera línea de playa' in lower_message):
-            return True
-        else:
-            return False
+        
+        return lower_message in ['primera linea de playa', 'primera línea de playa']
 
 
 def load_settings():
@@ -90,7 +89,7 @@ def is_call_available(name, chat_id, cooldown):
 
 def help(bot, update):
     log_message(update)
-    bot.sendMessage(update.message.chat_id, settings.help_string, parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.sendMessage(update.message.chat_id, settings.help_string, parse_mode=telegram.ParseMode.MARKDOWN, reply_to_message_id=update.message.message_id)
 
 
 def ask(bot, update):
@@ -98,8 +97,16 @@ def ask(bot, update):
     bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
     selected_string = settings.answers[random.randint(0, int(len(settings.answers) - 1))]
     human_texting(selected_string)
-    bot.sendMessage(update.message.chat_id, selected_string, parse_mode=telegram.ParseMode.MARKDOWN,
-                    reply_to_message_id=update.message.message_id)
+    if random.randint(0,100) >= 95:
+        tempLetterPos = random.randint(0,len(selected_string)-1) 
+        tempAsk = selected_string[:tempLetterPos] + random.choice(string.ascii_letters) +  selected_string[tempLetterPos:]
+        tempMessage = bot.sendMessage(update.message.chat_id, tempAsk, reply_to_message_id=update.message.message_id)
+        bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
+        human_texting(selected_string)
+        bot.edit_message_text(selected_string, chat_id=update.message.chat_id, message_id=tempMessage.message_id)
+    else:
+        bot.sendMessage(update.message.chat_id, selected_string, parse_mode=telegram.ParseMode.MARKDOWN,
+						reply_to_message_id=update.message.message_id)
 
 
 def take_rtsp_screenshot(cam_id):
@@ -153,7 +160,7 @@ def alguien(bot, update):
         bot.sendMessage(update.message.chat_id,
                         scan.who_is_there()[
                             0] + "\n`No podrás hacer otro /alguien hasta dentro de 15 minutos`.",
-                        parse_mode="Markdown")
+                        parse_mode="Markdown", reply_to_message_id=update.message.message_id)
     else:
         bot.deleteMessage(update.message.message_id)
 
@@ -167,23 +174,34 @@ def human_texting(string):
 
 def jokes(bot, update):
     chat_id = update.message.chat.id
-    if is_call_available("joke", chat_id, 30):
+    if is_call_available("joke", chat_id, 30) and random.randint(0,100) >= 30:
         bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
         selected_joke = settings.jokes[random.randint(0, int(len(settings.jokes) - 1))]
         human_texting(selected_joke)
-        bot.sendMessage(update.message.chat_id, selected_joke,
+
+        if random.randint(0,100) >= 95:
+            tempLetterPos = random.randint(0,len(selected_joke)-1) 
+            tempJoke = selected_joke[:tempLetterPos] + random.choice(string.ascii_letters) +  selected_joke[tempLetterPos:]
+            tempMessage = bot.sendMessage(update.message.chat_id, tempJoke,
+                        reply_to_message_id=update.message.message_id)
+            bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
+            human_texting(selected_joke)
+            bot.edit_message_text(selected_joke, chat_id=update.message.chat_id, message_id=tempMessage.message_id)
+        else:
+            bot.sendMessage(update.message.chat_id, selected_joke,
                         reply_to_message_id=update.message.message_id)
 
 
 def reload_data(bot, update):
     if update.message.from_user.id == settings.president_chatid:
         load_settings()
-        bot.send_message(chat_id=update.message.chat_id, text="Datos cargados")
+        bot.send_message(chat_id=update.message.chat_id, text="Datos cargados",
+                        reply_to_message_id=update.message.message_id)
 
 
 def playa(bot, update):
-    if is_call_available("playa", update.message.chat.id, 10):
-        bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
+    if is_call_available("playa", update.message.chat.id, 10) and random.randint(0,100) >= 30:
+        bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI', reply_to_message_id=update.message.message_id)
 
 
 def name_changer(bot, job):
