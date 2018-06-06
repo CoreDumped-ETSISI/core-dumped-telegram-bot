@@ -30,13 +30,15 @@ def room_members_parser(people):
 
 
 def who_is_there():
-    macs = scan_for_devices()
     who_are_there = []
-    logger.debug("ENCONTRADOS: " + str(macs))
-    for mac in scan_for_devices():
-        if mac in list(settings.devices.keys()):
-            who_are_there.append(settings.devices[mac])
-    who_are_there = sorted(set(who_are_there))
+    macs = []
+    for i in range(0,3) and len(who_are_there)==0:
+        macs = macs.append(scan_for_devices())
+        logger.debug("ENCONTRADOS: " + str(macs))
+        for mac in scan_for_devices():
+            if mac in list(settings.devices.keys()):
+                who_are_there.append(settings.devices[mac])
+        who_are_there = sorted(set(who_are_there))
     respuesta = room_members_parser(who_are_there)
     return respuesta, who_are_there
 
