@@ -38,10 +38,9 @@ def error_callback(bot, update, error):
 class LaughFilter(BaseFilter):
     def filter(self, message):
         lower_message = str(message.text).lower()
-        if ('hahaha' in lower_message) or ('jajaja' in lower_message):
-            return True
-        else:
-            return False
+        regex = r"\b([aeiou]*(?:[hj]+[aeiou]+){2,}[hj]?(\W|$))|((?:l+o+)+l+)\b"
+
+        return re.match(re.compile(regex), lower_message) != None
 
 
 class PlayaFilter(BaseFilter):
