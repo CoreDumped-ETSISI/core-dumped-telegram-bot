@@ -165,7 +165,7 @@ def human_texting(string):
 
 def jokes(bot, update):
     chat_id = update.message.chat.id
-    if is_call_available("joke", chat_id, 30) and :
+    if is_call_available("joke", chat_id, 30) and random.randint(0,100) >= 30:
         bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
         selected_joke = settings.jokes[random.randint(0, int(len(settings.jokes) - 1))]
         human_texting(selected_joke)
@@ -181,7 +181,7 @@ def reload_data(bot, update):
 
 
 def playa(bot, update):
-    if is_call_available("playa", update.message.chat.id, 10):
+    if is_call_available("playa", update.message.chat.id, 10) and random.randint(0,100) >= 30:
         bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI', reply_to_message_id=update.message.message_id)
 
 
