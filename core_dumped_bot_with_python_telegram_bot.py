@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import re
 import random
 import telegram
 import network_scan as scan
@@ -164,7 +165,7 @@ def human_texting(string):
 
 def jokes(bot, update):
     chat_id = update.message.chat.id
-    if is_call_available("joke", chat_id, 30):
+    if is_call_available("joke", chat_id, 30) and :
         bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
         selected_joke = settings.jokes[random.randint(0, int(len(settings.jokes) - 1))]
         human_texting(selected_joke)
