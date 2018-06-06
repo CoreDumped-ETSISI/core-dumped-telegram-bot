@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import re
+import string
 import random
 import telegram
 import network_scan as scan
@@ -96,8 +97,16 @@ def ask(bot, update):
     bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
     selected_string = settings.answers[random.randint(0, int(len(settings.answers) - 1))]
     human_texting(selected_string)
-    bot.sendMessage(update.message.chat_id, selected_string, parse_mode=telegram.ParseMode.MARKDOWN,
-                    reply_to_message_id=update.message.message_id)
+    if random.randint(0,100) >= 95:
+        tempLetterPos = random.randint(0,len(selected_string)-1) 
+        tempAsk = selected_string[:tempLetterPos] + random.choice(string.ascii_letters) +  selected_string[tempLetterPos:]
+        tempMessage = bot.sendMessage(update.message.chat_id, tempAsk, reply_to_message_id=update.message.message_id)
+        bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
+        human_texting(selected_string)
+        bot.edit_message_text(selected_string, chat_id=update.message.chat_id, message_id=tempMessage.message_id)
+    else:
+        bot.sendMessage(update.message.chat_id, selected_string, parse_mode=telegram.ParseMode.MARKDOWN,
+						reply_to_message_id=update.message.message_id)
 
 
 def take_rtsp_screenshot(cam_id):
@@ -169,7 +178,17 @@ def jokes(bot, update):
         bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
         selected_joke = settings.jokes[random.randint(0, int(len(settings.jokes) - 1))]
         human_texting(selected_joke)
-        bot.sendMessage(update.message.chat_id, selected_joke,
+
+        if random.randint(0,100) >= 95:
+            tempLetterPos = random.randint(0,len(selected_joke)-1) 
+            tempJoke = selected_joke[:tempLetterPos] + random.choice(string.ascii_letters) +  selected_joke[tempLetterPos:]
+            tempMessage = bot.sendMessage(update.message.chat_id, tempJoke,
+                        reply_to_message_id=update.message.message_id)
+            bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
+            human_texting(selected_joke)
+            bot.edit_message_text(selected_joke, chat_id=update.message.chat_id, message_id=tempMessage.message_id)
+        else:
+            bot.sendMessage(update.message.chat_id, selected_joke,
                         reply_to_message_id=update.message.message_id)
 
 
