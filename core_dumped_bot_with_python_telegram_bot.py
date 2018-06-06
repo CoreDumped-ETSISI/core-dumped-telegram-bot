@@ -46,10 +46,8 @@ class LaughFilter(BaseFilter):
 class PlayaFilter(BaseFilter):
     def filter(self, message):
         lower_message = str(message.text).lower()
-        if ('primera linea de playa' in lower_message) or ('primera línea de playa' in lower_message):
-            return True
-        else:
-            return False
+        
+        return lower_message in ['primera linea de playa', 'primera línea de playa']
 
 
 def load_settings():
@@ -89,7 +87,7 @@ def is_call_available(name, chat_id, cooldown):
 
 def help(bot, update):
     log_message(update)
-    bot.sendMessage(update.message.chat_id, settings.help_string, parse_mode=telegram.ParseMode.MARKDOWN)
+    bot.sendMessage(update.message.chat_id, settings.help_string, parse_mode=telegram.ParseMode.MARKDOWN, reply_to_message_id=update.message.message_id)
 
 
 def ask(bot, update):
@@ -152,7 +150,7 @@ def alguien(bot, update):
         bot.sendMessage(update.message.chat_id,
                         scan.who_is_there()[
                             0] + "\n`No podrás hacer otro /alguien hasta dentro de 15 minutos`.",
-                        parse_mode="Markdown")
+                        parse_mode="Markdown", reply_to_message_id=update.message.message_id)
     else:
         bot.deleteMessage(update.message.message_id)
 
@@ -177,12 +175,13 @@ def jokes(bot, update):
 def reload_data(bot, update):
     if update.message.from_user.id == settings.president_chatid:
         load_settings()
-        bot.send_message(chat_id=update.message.chat_id, text="Datos cargados")
+        bot.send_message(chat_id=update.message.chat_id, text="Datos cargados",
+                        reply_to_message_id=update.message.message_id)
 
 
 def playa(bot, update):
     if is_call_available("playa", update.message.chat.id, 10):
-        bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
+        bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI', reply_to_message_id=update.message.message_id)
 
 
 def name_changer(bot, job):
