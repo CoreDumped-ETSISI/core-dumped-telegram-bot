@@ -9,7 +9,7 @@ import os
 from logger import get_logger
 from data_loader import DataLoader
 import sys
-from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter
+from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, Filters
 from random import normalvariate
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
@@ -38,10 +38,8 @@ def error_callback(bot, update, error):
 class LaughFilter(BaseFilter):
     def filter(self, message):
         lower_message = str(message.text).lower()
-        if ('hahaha' in lower_message) or ('jajaja' in lower_message):
-            return True
-        else:
-            return False
+        return ('hahaha' in lower_message) or ('jajaja' in lower_message) or ('😂' in lower_message) or \
+               ('🤣' in lower_message) or ('😹' in lower_message)
 
 
 class PlayaFilter(BaseFilter):
@@ -199,6 +197,12 @@ def name_changer(bot, job):
         logger.exception("Error al actualizar el nombre del grupo Core Dumped.")
 
 
+def onTitleChanged(bot: telegram.Bot, update):
+    message_id = update.message.message_id
+    chat_id = update.message.chat_id
+    bot.deleteMessage(chat_id=chat_id, message_id=message_id)
+
+
 if __name__ == "__main__":
     print("Core Dumped Bot: Starting...")
 
@@ -207,7 +211,7 @@ if __name__ == "__main__":
 
     try:
         logger.info("Conectando con la API de Telegram.")
-        updater = Updater(settings.telegram_token)
+        updater = Updater(settings.telegram_token, workers=10)
         dispatcher = updater.dispatcher
         dispatcher.add_handler(CommandHandler('help', help))
         dispatcher.add_handler(CommandHandler('ask', ask))
@@ -216,6 +220,7 @@ if __name__ == "__main__":
         dispatcher.add_handler(CommandHandler('fotorack', fotorack))
         dispatcher.add_handler(CommandHandler('alguien', alguien))
         dispatcher.add_handler(CommandHandler('reload', reload_data))
+        dispatcher.add_handler(Filters.status_update.new_chat_title, onTitleChanged)
         joke_filter = LaughFilter()
         dispatcher.add_handler(MessageHandler(joke_filter, jokes))
         # Inside joke
