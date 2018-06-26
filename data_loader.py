@@ -13,8 +13,8 @@ class DataLoader:
         try:
             json_file = open('data-and-settings.json')
             data_and_settings = json.load(json_file, encoding="utf-8")
-        except:
-            logger.exception("Error al cargar el JSON de configuración")
+        except Exception as e:
+            logger.exception("Error al cargar el JSON de configuración. Más info: " + str(e))
         else:
             logger.info("JSON cargado con éxito")
             self.telegram_token = data_and_settings["telegram token"]
