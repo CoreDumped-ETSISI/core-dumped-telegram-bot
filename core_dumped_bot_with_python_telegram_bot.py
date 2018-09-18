@@ -11,7 +11,7 @@ import os
 from logger import get_logger
 from data_loader import DataLoader
 import sys
-from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, RegexHandler, StringRegexHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, RegexHandler
 from random import normalvariate
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
@@ -153,7 +153,7 @@ def alguien(bot, update):
     if is_call_available("alguien", update.message.chat_id, 15):
         bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
         bot.sendMessage(update.message.chat_id,
-                        scan.who_is_there()[
+                        scan.scan_for_people_in_network()[
                             0] + "\n`No podrás hacer otro /alguien hasta dentro de 15 minutos`.",
                         parse_mode="Markdown")
     else:
@@ -221,7 +221,7 @@ if __name__ == "__main__":
         logger.info("Conectando con la API de Telegram.")
         updater = Updater(settings.telegram_token)
         dispatcher = updater.dispatcher
-        the_game_regex = re.compile( r".*(\b(perdido|game)\b)" , re.I | re.U | re.M)
+        the_game_regex = re.compile(r".*(\b(perdido|game)\b)", re.I | re.U | re.M)
         dispatcher.add_handler(RegexHandler(the_game_regex, the_game))
         dispatcher.add_handler(CommandHandler('help', help))
         dispatcher.add_handler(CommandHandler('ask', ask))
@@ -239,14 +239,12 @@ if __name__ == "__main__":
     except Exception as ex:
         logger.exception("Error al conectar con la API de Telegram.")
         quit()
-
-    try:
-        jobs = updater.job_queue
-        job_name_changer = jobs.run_repeating(name_changer, 15 * 60, 300)
-        logger.info("Iniciando jobs")
-    except Exception as ex:
-        logger.exception("Error al cargar la job list. Ignorando jobs...")
-
+    # try:
+    #     jobs = updater.job_queue
+    #     # job_name_changer = jobs.run_repeating(name_changer, 30 * 60, 300)
+    #     logger.info("Iniciando jobs")
+    # except Exception as ex:
+    #     logger.exception("Error al cargar la job list. Ignorando jobs...")
     updater.start_polling()
     logger.info("Core Dumped Bot: Estoy escuchando.")
     updater.idle()
