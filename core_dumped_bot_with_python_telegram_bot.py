@@ -113,7 +113,7 @@ def take_rtsp_screenshot(cam_id):
 
 def foto(bot, update):
     log_message(update)
-    teclado_fotos = [['/fotonevera'], ['/fotorack']]
+    teclado_fotos = [['/fotonova'], ['/fotocore']]
     reply_markup = telegram.ReplyKeyboardMarkup(teclado_fotos)
     bot.send_message(chat_id=update.message.chat_id,
                      text="¿Qué foto quieres?",
@@ -126,7 +126,7 @@ def log_message(update):
         update.message.chat_id) + "]")
 
 
-def fotonevera(bot, update):
+def fotonova(bot, update):
     log_message(update)
 
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
@@ -138,7 +138,7 @@ def fotonevera(bot, update):
         logger.debug(settings.pictures_directory + '/snapshot.jpg')
 
 
-def fotorack(bot, update):
+def fotocore(bot, update):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         bot.send_chat_action(chat_id=update.message.chat_id, action='upload_photo')
@@ -226,8 +226,8 @@ if __name__ == "__main__":
         dispatcher.add_handler(CommandHandler('help', help))
         dispatcher.add_handler(CommandHandler('ask', ask))
         dispatcher.add_handler(CommandHandler('foto', foto))
-        dispatcher.add_handler(CommandHandler('fotonevera', fotonevera))
-        dispatcher.add_handler(CommandHandler('fotorack', fotorack))
+        dispatcher.add_handler(CommandHandler('fotonova', fotonova))
+        dispatcher.add_handler(CommandHandler('fotocore', fotocore))
         dispatcher.add_handler(CommandHandler('alguien', alguien))
         dispatcher.add_handler(CommandHandler('reload', reload_data))
         joke_filter = LaughFilter()
@@ -239,12 +239,12 @@ if __name__ == "__main__":
     except Exception as ex:
         logger.exception("Error al conectar con la API de Telegram.")
         quit()
-    # try:
-    #     jobs = updater.job_queue
-    #     # job_name_changer = jobs.run_repeating(name_changer, 30 * 60, 300)
-    #     logger.info("Iniciando jobs")
-    # except Exception as ex:
-    #     logger.exception("Error al cargar la job list. Ignorando jobs...")
+    try:
+        jobs = updater.job_queue
+        job_name_changer = jobs.run_repeating(name_changer, 30 * 60, 300)
+        logger.info("Iniciando jobs")
+    except Exception as ex:
+        logger.exception("Error al cargar la job list. Ignorando jobs...")
     updater.start_polling()
     logger.info("Core Dumped Bot: Estoy escuchando.")
     updater.idle()
